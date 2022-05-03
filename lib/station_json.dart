@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:subwayjsonfile/search.dart';
 import 'dart:convert';
 import 'package:subwayjsonfile/station_model.dart';
 
@@ -13,64 +14,81 @@ class Stationjson extends StatefulWidget {
 
 class StationjsonState extends State<Stationjson> {
 
-  List<dynamic> stationList = [];
+  Station station = Station();
+  late String subName = '미정';
+  late int subline = 0;
+  late double sublat = 0;
+  late double sublng = 0;
 
-  Future<void> readJson() async {
+  Future<void> readJson(dynamic station) async {
     final String response = await rootBundle.loadString('assets/station_coorinate.json');
     final data = await json.decode(response);
-    stationList = data['station'].map((data) => Station.fromJson(data)).toList();
+    station = data['station'].map((data) => Station.fromJson(data)).
+    setState((){
+      subline = station.line;
+      subName = station.name;
+      sublat = station.lat;
+      sublng = station.lng;
+    });
   }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    readJson();
+    readJson;
   }
 
-
-
-    @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('station json'),
-      ),
       body: Container(
         constraints: BoxConstraints.expand(),
         child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(left: 15.0),
-                child: Row(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    TextButton(
-                      onPressed: () {
-
+                    FlatButton(  // 검색란
+                      onPressed: () async {
+                        var typedName = await Navigator.push(context,
+                          MaterialPageRoute(   //typedName = subName
+                            builder: (context) => search(),
+                          ),
+                        );
+                        if (typedName!= null) { // 지하철을 검색한값 = typeNAme
+                          var subName = typedName;
+                          readJson(subName);
+                        }
                       },
-                      child: Text(
-                        '$name°',
+                      child: Icon(
+                        Icons.location_city,
+                        size: 50.0,
                       ),
                     ),
-
                   ],
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(right: 15.0),
-                child: Text(
-                  '$code in $line',
-                  textAlign: TextAlign.right,
-                ),
-              ),
 
-            ],
+                Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(right: 15.0),
+                    child: Text(
+                      ' $subName 확인받음 $subline 호선 $sublng $sublng',
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
+
+

@@ -51,7 +51,7 @@ class _searchState extends State<search> {
                     Navigator.pop(context, subName); // cityName을 가지고 로딩 스크린으로?
                   },
                   child: Text(
-                    'Get Weather',
+                    '검색',
                   ),
                 ),
               ),
